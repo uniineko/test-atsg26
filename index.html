@@ -29,7 +29,7 @@
     }
 
     .container {
-      max-width: 1100px;
+      max-width: 1200px;
       margin: 0 auto;
       padding: 24px;
     }
@@ -57,20 +57,48 @@
       line-height: 1.5;
     }
 
-    .top-grid {
+    .start-screen {
+      min-height: 70vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      gap: 16px;
+    }
+
+    .start-screen h1 {
+      margin: 0;
+      font-size: 2.4rem;
+    }
+
+    .app-shell {
       display: grid;
-      grid-template-columns: 1.1fr 0.9fr;
+      grid-template-columns: 300px 1fr;
       gap: 20px;
-      margin-bottom: 20px;
+      align-items: start;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 24px;
+      display: grid;
+      gap: 20px;
+    }
+
+    .main-content {
+      display: grid;
+      gap: 20px;
     }
 
     .card {
       padding: 20px;
     }
 
-    .progress-row {
+    .progress-row,
+    .progress-column {
       display: grid;
-      grid-template-columns: repeat(5, 1fr);
+      grid-template-columns: 1fr;
       gap: 10px;
       margin-top: 16px;
     }
@@ -187,6 +215,12 @@
     button:hover, .btn:hover {
       opacity: 0.95;
       transform: translateY(-1px);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
     }
 
     .btn-secondary {
@@ -369,10 +403,18 @@
     }
 
     @media (max-width: 900px) {
-      .top-grid,
+      .app-shell {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        position: static;
+      }
+
       .summary-grid,
       .station-list,
-      .progress-row {
+      .progress-row,
+      .progress-column {
         grid-template-columns: 1fr;
       }
 
@@ -393,44 +435,45 @@
 </head>
 <body>
   <div class="container">
-    <section class="hero">
+    <section id="startScreen" class="hero start-screen">
       <h1>Interactive Library Trail</h1>
-      <p>
-        Complete all 5 stations to finish the trail. After each completed station,
-        participants can choose <strong>their badge/strong>.
-      </p>
+      <button onclick="enterTrail()">Enter</button>
     </section>
 
-    <section class="top-grid">
-      <div class="card">
-        <h2>Trail Progress</h2>
-        <p id="progressText">0 of 5 stations completed.</p>
-        <div id="progressRow" class="progress-row"></div>
-        <div class="btn-row">
-          <button class="btn-secondary" id="resetProgressBtn">Reset Progress</button>
-        </div>
-      </div>
+    <div id="trailApp" class="app-shell hidden">
+      <aside class="sidebar">
+        <section class="card">
+          <h2>Trail Progress</h2>
+          <p id="progressText">0 of 5 stations completed.</p>
+          <div id="progressRow" class="progress-column"></div>
+          <div class="btn-row">
+            <button class="btn-secondary" id="resetProgressBtn">Reset Progress</button>
+          </div>
+        </section>
 
-      <div class="card">
-        <h2>Chosen Badges</h2>
-        <div id="chosenBadges"></div>
-      </div>
-    </section>
+        <section class="card">
+          <h2>Chosen Badges</h2>
+          <div id="chosenBadges"></div>
+        </section>
+      </aside>
 
-    <section>
-      <div id="stationList" class="station-list"></div>
-    </section>
+      <main class="main-content">
+        <section>
+          <div id="stationList" class="station-list"></div>
+        </section>
 
-    <section id="gameArea" class="card game-area"></section>
+        <section id="gameArea" class="card game-area"></section>
 
-    <section id="badgeChoiceArea" class="card hidden"></section>
+        <section id="badgeChoiceArea" class="card hidden"></section>
 
-    <section id="summaryArea" class="summary-grid hidden"></section>
+        <section id="summaryArea" class="summary-grid hidden"></section>
 
-    <p class="footer-note">
-      Setup note: replace the sample questions, image, hotspot coordinates, video clue text,
-      and badge names with your actual library trail content. This file is fully editable.
-    </p>
+        <p class="footer-note">
+          Setup note: replace the sample questions, image, hotspot coordinates, video clue text,
+          and badge names with your actual library trail content. This file is fully editable.
+        </p>
+      </main>
+    </div>
   </div>
 
   <script>
@@ -468,7 +511,7 @@
               answer: 1
             },
             {
-              prompt: "Which one of the following isn’t a local playwright? ",
+              prompt: "Which one of the following isn’t a local playwright?",
               options: ["Kuo Pao Kun", "Alfian Sa'at", "Adriana Nordin Manan", "Jean Tay"],
               answer: 2
             }
@@ -517,8 +560,8 @@
               "Across 1: An art form expressed through movement of the body.",
               "Across 2: What art form can be heard but not seen?",
               "Across 3: Where actors perform.",
-              "Down 1: -A person who performs on stage in plays. (ACTOR)",
-              "Down 2: The creative use of voice and body to tell a story. (KADEL placeholder — replace with your real clue/word if needed)"
+              "Down 1: A person who performs on stage in plays. (ACTOR)",
+              "Down 2: The creative use of voice and body to tell a story."
             ]
           }
         },
@@ -532,9 +575,9 @@
             { icon: "🔎", name: "choice", description: "Bus, trains, taxis, it's just point A to B" }
           ],
           image: {
-            src: "spot-difference.jpg",
-            alt: "Library interior placeholder image",
-            instruction: "Replace this placeholder with your actual station image. Participants should click the difference they spotted from the real-life prompt.",
+            src: "images/spot-difference.jpg",
+            alt: "Spot the difference image",
+            instruction: "Click the area where you spotted the difference.",
             hotspot: { xPercent: 69, yPercent: 41, radiusPercent: 8 }
           }
         },
@@ -548,7 +591,7 @@
             { icon: "🎬", name: "Choice", description: "I have to keep my options as open as possible" }
           ],
           instruction: "Participants watch a separate video in real life. When they find the hidden phrase, they enter it below.",
-          acceptedAnswers: ["Red", "red", "RED"]
+          acceptedAnswers: ["Red"]
         }
       ]
     };
@@ -558,9 +601,12 @@
     const defaultState = {
       completedStations: [],
       selectedStationId: 1,
+      hasEntered: false,
       badges: {},
       quizAnswers: {},
       scrambleAnswers: {},
+      quizProgress: {},
+      scrambleProgress: {},
       crosswordInputs: {},
       spotMarker: null,
       passwordInput: "",
@@ -598,7 +644,23 @@
       return trailData.stations.find(s => s.id === id);
     }
 
+    function enterTrail() {
+      state.hasEntered = true;
+      render();
+    }
+
     function render() {
+      const startScreen = document.getElementById("startScreen");
+      const trailApp = document.getElementById("trailApp");
+
+      if (state.hasEntered) {
+        startScreen.classList.add("hidden");
+        trailApp.classList.remove("hidden");
+      } else {
+        startScreen.classList.remove("hidden");
+        trailApp.classList.add("hidden");
+      }
+
       renderProgress();
       renderStationCards();
       renderGameArea();
@@ -673,30 +735,35 @@
     }
 
     function renderQuiz(container, station) {
-      const selected = state.quizAnswers[station.id] || {};
-      const allAnswered = station.questions.every((_, index) => selected[index] !== undefined);
-      const correctCount = station.questions.reduce((count, q, index) => count + (selected[index] === q.answer ? 1 : 0), 0);
+      const currentIndex = state.quizProgress[station.id] || 0;
+      const currentQuestion = station.questions[currentIndex];
+      const selected = (state.quizAnswers[station.id] || {})[currentIndex];
+
+      if (!currentQuestion) {
+        completeStation(station.id);
+        return;
+      }
 
       container.innerHTML = `
         <div>
           <h2>${station.title}</h2>
           <p>${station.description}</p>
-          ${station.questions.map((q, qIndex) => `
-            <div class="question-block">
-              <div class="question-title">Question ${qIndex + 1}: ${q.prompt}</div>
-              <div class="option-list">
-                ${q.options.map((option, optIndex) => `
-                  <button class="answer-btn ${selected[qIndex] === optIndex ? "selected" : ""}" onclick="selectQuizAnswer(${station.id}, ${qIndex}, ${optIndex})">
-                    ${option}
-                  </button>
-                `).join("")}
-              </div>
+          <p>Question ${currentIndex + 1} of ${station.questions.length}</p>
+
+          <div class="question-block">
+            <div class="question-title">${currentQuestion.prompt}</div>
+            <div class="option-list">
+              ${currentQuestion.options.map((option, optIndex) => `
+                <button class="answer-btn ${selected === optIndex ? "selected" : ""}" onclick="selectQuizAnswer(${station.id}, ${currentIndex}, ${optIndex})">
+                  ${option}
+                </button>
+              `).join("")}
             </div>
-          `).join("")}
-          <div class="btn-row">
-            <button ${!allAnswered ? "disabled" : ""} onclick="submitQuiz(${station.id})">Submit Quiz</button>
           </div>
-          <div class="hint-box">Current score preview: ${correctCount} / ${station.questions.length}</div>
+
+          <div class="btn-row">
+            <button ${selected === undefined ? "disabled" : ""} onclick="submitQuiz(${station.id})">Submit Answer</button>
+          </div>
         </div>
       `;
     }
@@ -709,39 +776,53 @@
 
     function submitQuiz(stationId) {
       const station = stationById(stationId);
-      const selected = state.quizAnswers[stationId] || {};
-      const correctCount = station.questions.reduce((count, q, index) => count + (selected[index] === q.answer ? 1 : 0), 0);
-      const passed = correctCount === station.questions.length;
+      const currentIndex = state.quizProgress[stationId] || 0;
+      const selected = (state.quizAnswers[stationId] || {})[currentIndex];
+      const currentQuestion = station.questions[currentIndex];
 
-      if (!passed) {
-        alert(`You got ${correctCount}/${station.questions.length}. Set this to your preferred pass rule. Right now, all answers must be correct.`);
-        return;
+      if (selected === currentQuestion.answer) {
+        state.quizProgress[stationId] = currentIndex + 1;
+
+        if (state.quizProgress[stationId] >= station.questions.length) {
+          completeStation(stationId);
+        } else {
+          alert("Correct! Moving to the next question.");
+          render();
+        }
+      } else {
+        alert("Not correct yet. Try again.");
       }
-
-      completeStation(stationId);
     }
 
     function renderScramble(container, station) {
+      const currentIndex = state.scrambleProgress[station.id] || 0;
+      const currentQuestion = station.questions[currentIndex];
       const answers = state.scrambleAnswers[station.id] || {};
+
+      if (!currentQuestion) {
+        completeStation(station.id);
+        return;
+      }
 
       container.innerHTML = `
         <div>
           <h2>${station.title}</h2>
           <p>${station.description}</p>
-          ${station.questions.map((q, index) => `
-            <div class="question-block">
-              <div class="question-title">Word ${index + 1}: ${q.scrambled}</div>
-              <div class="hint-box">Clue: ${q.clue}</div>
-              <input
-                type="text"
-                value="${answers[index] || ""}"
-                placeholder="Type your answer"
-                oninput="updateScrambleAnswer(${station.id}, ${index}, this.value)"
-              />
-            </div>
-          `).join("")}
+          <p>Word ${currentIndex + 1} of ${station.questions.length}</p>
+
+          <div class="question-block">
+            <div class="question-title">${currentQuestion.scrambled}</div>
+            <div class="hint-box">Clue: ${currentQuestion.clue}</div>
+            <input
+              type="text"
+              value="${answers[currentIndex] || ""}"
+              placeholder="Type your answer"
+              oninput="updateScrambleAnswer(${station.id}, ${currentIndex}, this.value)"
+            />
+          </div>
+
           <div class="btn-row">
-            <button onclick="submitScramble(${station.id})">Submit Word Scramble</button>
+            <button onclick="submitScramble(${station.id})">Submit Answer</button>
           </div>
         </div>
       `;
@@ -755,18 +836,23 @@
 
     function submitScramble(stationId) {
       const station = stationById(stationId);
+      const currentIndex = state.scrambleProgress[stationId] || 0;
+      const currentQuestion = station.questions[currentIndex];
       const answers = state.scrambleAnswers[stationId] || {};
-      const allCorrect = station.questions.every((q, index) => {
-        const given = (answers[index] || "").trim().toUpperCase();
-        return given === q.answer.toUpperCase();
-      });
+      const given = (answers[currentIndex] || "").trim().toUpperCase();
 
-      if (!allCorrect) {
-        alert("Not quite yet. Check the scrambled words and try again.");
-        return;
+      if (given === currentQuestion.answer.toUpperCase()) {
+        state.scrambleProgress[stationId] = currentIndex + 1;
+
+        if (state.scrambleProgress[stationId] >= station.questions.length) {
+          completeStation(stationId);
+        } else {
+          alert("Correct! Moving to the next word.");
+          render();
+        }
+      } else {
+        alert("Not correct yet. Try again.");
       }
-
-      completeStation(stationId);
     }
 
     function renderCrossword(container, station) {
@@ -869,6 +955,7 @@
     function submitSpotDifference(stationId) {
       const station = stationById(stationId);
       const guess = state.spotMarker;
+
       if (!guess) {
         alert("Please click on the image first.");
         return;
@@ -927,10 +1014,12 @@
         state.completedStations.push(stationId);
         state.completedStations.sort((a, b) => a - b);
       }
+
       state.pendingBadgeStationId = stationId;
 
       const nextStation = stationById(stationId + 1);
       if (nextStation) state.selectedStationId = nextStation.id;
+
       render();
     }
 
@@ -967,7 +1056,11 @@
     function chooseBadge(stationId, badgeIndex) {
       const station = stationById(stationId);
       state.badges[stationId] = station.badgeOptions[badgeIndex];
-      if (state.pendingBadgeStationId === stationId) state.pendingBadgeStationId = null;
+
+      if (state.pendingBadgeStationId === stationId) {
+        state.pendingBadgeStationId = null;
+      }
+
       render();
     }
 
@@ -999,7 +1092,6 @@
       }
 
       area.classList.remove("hidden");
-
       area.innerHTML = `
         <div class="summary-card">
           <h2>Trail Completed</h2>
@@ -1022,6 +1114,7 @@
       lines.push(`Trail: ${trailData.title}`);
       lines.push(`Completed stations: ${state.completedStations.join(", ")}`);
       lines.push(`Badges:`);
+
       trailData.stations.forEach(station => {
         const badge = state.badges[station.id];
         lines.push(`- Station ${station.id} (${station.title}): ${badge ? badge.name : "No badge selected"}`);
