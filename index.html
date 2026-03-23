@@ -12,7 +12,6 @@
       --muted: #6b7280;
       --line: #dbe3ee;
       --accent: #2563eb;
-      --accent-2: #0f766e;
       --good: #15803d;
       --bad: #b91c1c;
       --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
@@ -44,17 +43,6 @@
     .hero {
       padding: 28px;
       margin-bottom: 20px;
-    }
-
-    .hero h1 {
-      margin: 0 0 10px;
-      font-size: 2rem;
-    }
-
-    .hero p {
-      margin: 0;
-      color: var(--muted);
-      line-height: 1.5;
     }
 
     .start-screen {
@@ -116,11 +104,6 @@
       background: #f0fdf4;
     }
 
-    .progress-step.active {
-      border-color: #bfdbfe;
-      background: #eff6ff;
-    }
-
     .step-title {
       font-size: 0.9rem;
       font-weight: bold;
@@ -148,7 +131,6 @@
 
     .station-card:hover { transform: translateY(-2px); }
     .station-card.locked { opacity: 0.6; cursor: not-allowed; }
-    .station-card.selected { border-color: var(--accent); }
     .station-card.completed { border-color: #86efac; background: #f0fdf4; }
 
     .station-number {
@@ -253,7 +235,6 @@
       background: #eff6ff;
     }
 
-    .input,
     input[type="text"] {
       width: 100%;
       padding: 12px 14px;
@@ -262,14 +243,6 @@
       font-size: 1rem;
       margin-top: 8px;
     }
-
-    .feedback {
-      margin-top: 12px;
-      font-weight: bold;
-    }
-
-    .feedback.good { color: var(--good); }
-    .feedback.bad { color: var(--bad); }
 
     .crossword-grid {
       display: inline-grid;
@@ -469,8 +442,8 @@
         <section id="summaryArea" class="summary-grid hidden"></section>
 
         <p class="footer-note">
-          Setup note: replace the sample questions, image, hotspot coordinates, video clue text,
-          and badge names with your actual library trail content. This file is fully editable.
+          Setup note: replace the sample questions, image, hotspot coordinates,
+          video clue text, and badge names with your actual library trail content.
         </p>
       </main>
     </div>
@@ -497,7 +470,7 @@
             },
             {
               prompt: "What is the call number for Ba ma bu zai jia = Ilo Ilo [DVD]?",
-              options: ["792.4372 ILO", "791.4372 ILO", "798.4 ILO ", "791 ILO"],
+              options: ["792.4372 ILO", "791.4372 ILO", "798.4 ILO", "791 ILO"],
               answer: 1
             },
             {
@@ -571,8 +544,8 @@
           title: "Spot-the-Difference",
           description: "Click the difference you noticed in the image shown on screen.",
           badgeOptions: [
-            { icon: "👀", name: "car", description: "It's all about the comfort and quality of life" },
-            { icon: "🔎", name: "choice", description: "Bus, trains, taxis, it's just point A to B" }
+            { icon: "👀", name: "Car", description: "It's all about the comfort and quality of life" },
+            { icon: "🔎", name: "Choice", description: "Bus, trains, taxis, it's just point A to B" }
           ],
           image: {
             src: "images/spot-difference.jpg",
@@ -678,7 +651,6 @@
       progressRow.innerHTML = trailData.stations.map(station => {
         const classes = ["progress-step"];
         if (isCompleted(station.id)) classes.push("done");
-        if (state.selectedStationId === station.id) classes.push("active");
         return `
           <div class="${classes.join(" ")}">
             <div class="step-title">${station.id}. ${station.title}</div>
@@ -697,7 +669,6 @@
         const classes = ["station-card"];
         if (!isUnlocked(station.id)) classes.push("locked");
         if (isCompleted(station.id)) classes.push("completed");
-        if (state.selectedStationId === station.id) classes.push("selected");
         card.className = classes.join(" ");
 
         card.innerHTML = `
@@ -708,6 +679,7 @@
 
         card.addEventListener("click", () => {
           if (!isUnlocked(station.id)) return;
+          if (state.pendingBadgeStationId) return;
           state.selectedStationId = station.id;
           render();
         });
@@ -721,6 +693,17 @@
       const station = stationById(state.selectedStationId);
 
       if (!station) return;
+
+      if (state.pendingBadgeStationId) {
+        const pendingStation = stationById(state.pendingBadgeStationId);
+        gameArea.innerHTML = `
+          <div>
+            <h2>Choose Your Badge First</h2>
+            <p>You completed <strong>${pendingStation.title}</strong>. Pick your badge to unlock the next station.</p>
+          </div>
+        `;
+        return;
+      }
 
       if (!isUnlocked(station.id)) {
         gameArea.innerHTML = `<h2>${station.title}</h2><p>This station is locked. Complete the earlier station first.</p>`;
@@ -1016,10 +999,6 @@
       }
 
       state.pendingBadgeStationId = stationId;
-
-      const nextStation = stationById(stationId + 1);
-      if (nextStation) state.selectedStationId = nextStation.id;
-
       render();
     }
 
@@ -1038,7 +1017,7 @@
       area.innerHTML = `
         <div>
           <h2>Choose Your Badge for ${station.title}</h2>
-          <p>You completed this station. Pick <strong>1 out of 2</strong> badges.</p>
+          <p>You completed this station. Pick <strong>1 out of 2</strong> badges to continue.</p>
           <div class="badge-grid">
             ${station.badgeOptions.map((badge, index) => `
               <div class="badge-card">
@@ -1059,6 +1038,11 @@
 
       if (state.pendingBadgeStationId === stationId) {
         state.pendingBadgeStationId = null;
+      }
+
+      const nextStation = stationById(stationId + 1);
+      if (nextStation) {
+        state.selectedStationId = nextStation.id;
       }
 
       render();
